@@ -4,6 +4,7 @@ using UnityEngine.AI;
 public class Chicken : MonoBehaviour
 {
     [SerializeField] private GameObject house;
+    [SerializeField] private GameManager gameManager;
     private NavMeshAgent navMesh;
     public enum ChickenState
     {
@@ -17,7 +18,6 @@ public class Chicken : MonoBehaviour
         navMesh = GetComponent<NavMeshAgent>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         
@@ -32,17 +32,25 @@ public class Chicken : MonoBehaviour
     {
         if(state != ChickenState.BeingStolen)
         {
-            //navMesh.SetDestination(house.transform.position);
+            navMesh.SetDestination(house.transform.position);
         }
+    }
+
+    public void Dead()
+    {
+        gameManager.Stolen();
+        Destroy(gameObject);
     }
 
     public void Take()
     {
         state = ChickenState.BeingStolen;
+        navMesh.enabled = false;
     }
 
     public void Drop()
     {
         state = ChickenState.OnGround;
+        navMesh.enabled = true;
     }
 }

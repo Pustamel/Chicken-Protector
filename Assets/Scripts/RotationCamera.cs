@@ -6,6 +6,7 @@ public class RotationCamera : MonoBehaviour
     [SerializeField] private float sensitivity = 100f;
     private float yaw = 0f;
     private PlayerController player;
+    private Vector3 offsetCamera = new Vector3(-1f, 3f, 1f);
     void Start()
     {
         player = GameObject.Find("Player").GetComponent<PlayerController>();
