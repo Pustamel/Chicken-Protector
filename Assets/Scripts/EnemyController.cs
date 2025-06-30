@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 public class EnemyController : MonoBehaviour
@@ -8,35 +9,50 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private GameObject house;
     [SerializeField] private GameObject enemyBase;
     [SerializeField] private Image healthFilling;
+    [SerializeField] private ParticleSystem attackEffect;
+    [SerializeField] private AudioClip soundAttack;
 
     private bool carriesChicken;
     private NavMeshAgent navMesh;
     private Transform playerTarget;
+    private GameObject player;
     private Chicken chicken = null;
     private Rigidbody rb;
     private float health = 100f;
+    private float lastTimeAttack = 0f;
+    private AudioSource audioSource;
     void Start()
     {
         navMesh = GetComponent<NavMeshAgent>();
         navMesh.speed = 5.5f;
         navMesh.angularSpeed = 120f;
         navMesh.stoppingDistance = 1.5f;
+        navMesh.updateRotation = false;
 
         rb = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
     {
+        if (lastTimeAttack > 0 && lastTimeAttack != 0)
+        {
+            lastTimeAttack -= (Time.deltaTime);
+        }
+
         if (carriesChicken)
         {
+            //transform.LookAt(enemyBase.transform.position);
             GoToEnemyBase();
         }
         else if (playerTarget != null)
         {
+            //transform.LookAt(playerTarget.position);
             GoToPlayer();
         }
         else
         {
+            //transform.LookAt(house.transform.position);
             navMesh.SetDestination(house.transform.position);
         }
     }
@@ -62,6 +78,7 @@ public class EnemyController : MonoBehaviour
         if (other.CompareTag("Player") && !carriesChicken)
         {
             playerTarget = other.transform;
+            player = other.gameObject;
         }
         else if (other.CompareTag("Chicken") && !carriesChicken)
         {
@@ -85,6 +102,16 @@ public class EnemyController : MonoBehaviour
         if (distance > 2)
         {
             navMesh.SetDestination(playerTarget.position);
+
+        }
+
+        if(distance < 1.5 && (lastTimeAttack == 0 || lastTimeAttack < 0))
+        {
+            lastTimeAttack = 3.0f;
+            audioSource.PlayOneShot(soundAttack, 0.1f);
+            ParticleSystem effect = Instantiate(attackEffect, new Vector3(transform.position.x, transform.position.y, transform.position.z), transform.rotation);
+            Destroy(effect.gameObject, 2f);
+            player.GetComponent<PlayerController>().Damage(15.0f);
         }
     }
 

@@ -8,6 +8,7 @@ TagManager:
   - EnemyBase
   - PlayerBase
   - Chicken
+  - HealingPlace
   layers:
   - Default
   - TransparentFX

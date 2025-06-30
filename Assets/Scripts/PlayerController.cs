@@ -1,10 +1,9 @@
 using System;
-using System.Net.NetworkInformation;
-using UnityEditor.Timeline.Actions;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,9 +11,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] AudioClip attackSound;
     [SerializeField] float speed = 12f;
+    [SerializeField] private Image healthFilling;
+    [SerializeField] private GameManager gameManager;
 
     private InputAction movingAction;
-    private int health = 100;
+    private float health = 100f;
     private float lastTimeAttack = 0f;
     private float simpleDamage = 25.0f;
     private AudioSource AudioSource;
@@ -83,9 +84,29 @@ public class PlayerController : MonoBehaviour
             DeteckAndDamageEnemies();
     }
 
-    public void Damage(int damage)
+    private void Dead()
+    {
+        gameManager.GameOver(); 
+    }
+
+    public void Damage(float damage)
     {
         health -= damage;
+        healthFilling.fillAmount = (health / 100);
+
+        if (health <= 0)
+        {
+            Dead();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("HealingPlace"))
+        {
+            health = 100;
+            healthFilling.fillAmount = 1;
+        }
     }
 
     private void DeteckAndDamageEnemies()

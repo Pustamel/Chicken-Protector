@@ -1,33 +1,134 @@
+using System.Security.Cryptography;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
+using UnityEngine.UI;
+using static Unity.Collections.AllocatorManager;
 
 public class GameManager : MonoBehaviour
 {
-    private float timeGame = 60.0f;
+    [SerializeField] private TextMeshProUGUI timerElement;
+    [SerializeField] private TextMeshProUGUI welcomeMessage;
+    [SerializeField] private Light directionalLight;
+    [SerializeField] private Color eveningColor = new Color(1f, 0.5f, 0.2f);
+    [SerializeField] private Color morningColor = new Color(1f, 1f, 0.8f);
+    [SerializeField] private GameObject menu;
+    [SerializeField] private GameObject menuPaused;
+    [SerializeField] private ParticleSystem winEffect;
+
+    static private readonly float totalTimeGame = 60.0f;
+
+    private float timeGame = totalTimeGame;
     private ChickenCount chickenCount;
-    public bool isGaming = true;
+    public bool isGaming = false;
     public bool gameOver = false;
+    public bool paused = false;
+    private float elapsedTime = 0f;
+
     void Start()
     {
         chickenCount = GetComponent<ChickenCount>();
     }
 
-    // Update is called once per frame
+    private void Awake()
+    {
+        Time.timeScale = 0;
+    }
+
     void Update()
     {
-        if(!gameOver)
+       if(isGaming)
+        {
+            Gaming();
+        }
+    }
+
+    private void NightToMorning()
+    {
+        if (elapsedTime < totalTimeGame)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / totalTimeGame;
+            float tIntensity = elapsedTime / 10f;
+
+            directionalLight.intensity = Mathf.Lerp(1f, 2f, tIntensity);
+
+            directionalLight.color = Color.Lerp(eveningColor, morningColor, t);
+            directionalLight.intensity = Mathf.Lerp(0.3f, 1f, t);
+            directionalLight.transform.rotation = Quaternion.Euler(Mathf.Lerp(120f, 30f, t), -30f, 0);
+        }
+    }
+
+    public void StartGame()
+    {
+        menu.SetActive(false);
+        welcomeMessage.enabled = true;
+        Time.timeScale = 1;
+        isGaming = true;
+    }
+
+    void Gaming()
+    {
+        if (timeGame < (totalTimeGame - 2f))
+        {
+            welcomeMessage.enabled = false;
+        }
+
+        if (!gameOver && timeGame > 0)
         {
             timeGame -= Time.deltaTime;
+            timerElement.text = Mathf.CeilToInt(timeGame).ToString();
 
             if (timeGame <= 0.0f)
             {
-                TimeEnded();
+                Win();
+                Invoke("TimeEnded", 2f);
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            PouseGame();
+        }
+
+        NightToMorning();
     }
 
     void TimeEnded()
     {
+        isGaming = false;
+        Time.timeScale = 0;
+    }
 
+    private void Win()
+    {
+        if(!gameOver)
+        {
+            ParticleSystem effect = Instantiate(winEffect, Vector3.zero, Quaternion.identity);
+            Destroy(effect, 2f);
+        }
+    }
+
+    public void GameOver()
+    {
+        gameOver = true;
+        TimeEnded();
+    }
+
+    public void PouseGame()
+    {
+        if (isGaming == false)
+        {
+            Time.timeScale = 1;
+            isGaming = true;
+            menuPaused.SetActive(false);
+        } else
+        {
+            Time.timeScale = 0;
+            isGaming = false;
+            menuPaused.SetActive(true);
+        }
+        
     }
 
     public void Stolen()

@@ -5,7 +5,12 @@ public class Chicken : MonoBehaviour
 {
     [SerializeField] private GameObject house;
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private ParticleSystem deadEffect;
+    [SerializeField] private AudioClip deadSound;
+
     private NavMeshAgent navMesh;
+    private AudioSource audioSource;
+    private Animator animator;
     public enum ChickenState
     {
         OnGround,
@@ -15,12 +20,39 @@ public class Chicken : MonoBehaviour
     private int offsetY = 2;
     void Start()
     {
+        animator = GetComponent<Animator>();
         navMesh = GetComponent<NavMeshAgent>();
+        navMesh.updateRotation = false;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
     {
-        
+        if (state != ChickenState.BeingStolen)
+        {
+            transform.LookAt(-house.transform.position);
+
+            float distance = Vector3.Distance(transform.position, house.transform.position);
+            //Debug.Log($"DISTANCE {distance}");
+
+            if (distance > 3)
+            {
+                navMesh.SetDestination(house.transform.position);
+                animator.Play("walking");
+                animator.speed = 3f;
+            }
+            else
+            {
+                navMesh.ResetPath();
+                animator.Play("Idle");
+                animator.speed = 1f;
+            }
+        }
+        else
+        {
+            animator.Play("Idle");
+            animator.speed = 1f;
+        }
     }
 
     public void UpdatePosition(Vector3 position)
@@ -30,16 +62,14 @@ public class Chicken : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(state != ChickenState.BeingStolen)
-        {
-            navMesh.SetDestination(house.transform.position);
-        }
+      
     }
 
     public void Dead()
     {
+        audioSource.PlayOneShot(deadSound, 0.2f);
         gameManager.Stolen();
-        Destroy(gameObject);
+        Destroy(gameObject, 0.5f);
     }
 
     public void Take()
