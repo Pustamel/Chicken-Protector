@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private CharacterController controller;
     private Vector3 playerVelocity;
+    private Animator animator;
 
     void Start()
     {
@@ -29,6 +30,7 @@ public class PlayerController : MonoBehaviour
         AudioSource = GetComponent<AudioSource>();
         rb = GetComponent<Rigidbody>();
         controller = GetComponent<CharacterController>();
+        animator = GetComponent<Animator>();
     }
 
    
@@ -43,6 +45,8 @@ public class PlayerController : MonoBehaviour
 
         float forwardInput = moving.y;
         float horizontalInput = moving.x;
+
+        animator.SetBool("Run", horizontalInput != 0f || forwardInput != 0f);
 
         transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput);
         transform.Translate(Vector3.right * Time.deltaTime * speed * horizontalInput);
@@ -78,6 +82,7 @@ public class PlayerController : MonoBehaviour
 
     void Attack()
     {
+            animator.SetTrigger("Attack");
             AudioSource.PlayOneShot(attackSound, 0.3f);
             lastTimeAttack = 3.0f;
             Instantiate(attackEffect, new Vector3(transform.position.x, transform.position.y, transform.position.z), transform.rotation);

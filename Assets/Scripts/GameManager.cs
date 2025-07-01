@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Color morningColor = new Color(1f, 1f, 0.8f);
     [SerializeField] private GameObject menu;
     [SerializeField] private GameObject menuPaused;
+    [SerializeField] private GameObject menuGameOver;
     [SerializeField] private ParticleSystem winEffect;
 
     static private readonly float totalTimeGame = 60.0f;
@@ -113,6 +114,7 @@ public class GameManager : MonoBehaviour
     {
         gameOver = true;
         TimeEnded();
+        menuGameOver.SetActive(true);
     }
 
     public void PouseGame()

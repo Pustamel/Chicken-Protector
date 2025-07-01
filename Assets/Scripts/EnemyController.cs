@@ -42,17 +42,17 @@ public class EnemyController : MonoBehaviour
 
         if (carriesChicken)
         {
-            //transform.LookAt(enemyBase.transform.position);
+            transform.LookAt(enemyBase.transform.position);
             GoToEnemyBase();
         }
         else if (playerTarget != null)
         {
-            //transform.LookAt(playerTarget.position);
+            transform.LookAt(new Vector3(0, playerTarget.position.y, 0));
             GoToPlayer();
         }
         else
         {
-            //transform.LookAt(house.transform.position);
+            transform.LookAt(house.transform.position);
             navMesh.SetDestination(house.transform.position);
         }
     }
