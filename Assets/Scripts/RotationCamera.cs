@@ -5,13 +5,12 @@ public class RotationCamera : MonoBehaviour
 {
     [SerializeField] private float sensitivity = 100f;
     [SerializeField] private PlayerController player;
-    
+
     private float yaw = 0f;
     private Vector3 offsetCamera = new Vector3(-1f, 3f, 1f);
+
     void Start()
-    {
-    
-    }
+    {}
 
     // Update is called once per frame
     void Update()

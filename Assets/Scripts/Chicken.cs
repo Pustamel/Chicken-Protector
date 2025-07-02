@@ -78,6 +78,12 @@ public class Chicken : MonoBehaviour
         navMesh.enabled = false;
     }
 
+    public bool isCaptured ()
+    {
+        return state == ChickenState.BeingStolen;
+    }
+
+
     public void Drop()
     {
         state = ChickenState.OnGround;

@@ -5,12 +5,13 @@ using UnityEngine.UI;
 
 public class EnemyController : MonoBehaviour
 {
-    [SerializeField] private GameManager gameManager;
-    [SerializeField] private GameObject house;
-    [SerializeField] private GameObject enemyBase;
+    //[SerializeField] private GameManager gameManager;
+    //[SerializeField] private GameObject house;
+    //[SerializeField] private GameObject enemyBase;
     [SerializeField] private Image healthFilling;
     [SerializeField] private ParticleSystem attackEffect;
     [SerializeField] private AudioClip soundAttack;
+    //[SerializeField] private SpawnManager spawnManager;
 
     private bool carriesChicken;
     private NavMeshAgent navMesh;
@@ -21,6 +22,10 @@ public class EnemyController : MonoBehaviour
     private float health = 100f;
     private float lastTimeAttack = 0f;
     private AudioSource audioSource;
+    private GameManager gameManager;
+    private SpawnManager spawnManager;
+    private GameObject house;
+    private GameObject enemyBase;
     void Start()
     {
         navMesh = GetComponent<NavMeshAgent>();
@@ -31,6 +36,11 @@ public class EnemyController : MonoBehaviour
 
         rb = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
+
+        gameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
+        spawnManager = GameObject.FindWithTag("SpawnManager").GetComponent<SpawnManager>();
+        house = GameObject.FindWithTag("PlayerBase");
+        enemyBase = GameObject.FindWithTag("EnemyBase");
     }
 
     void Update()
@@ -125,7 +135,7 @@ public class EnemyController : MonoBehaviour
         chicken = other.GetComponent<Chicken>();
         float distance = Vector3.Distance(transform.position, other.transform.position);
 
-        if (chicken != null && distance < 3)
+        if (chicken != null && distance < 3 && !chicken.isCaptured())
         {
             carriesChicken = true;
             chicken.Take();
@@ -144,6 +154,7 @@ public class EnemyController : MonoBehaviour
 
     private void Dead()
     {
+        spawnManager.DeleteSpawnedEnemy();
         Destroy(gameObject);
     }
 

@@ -43,33 +43,45 @@ public class PlayerController : MonoBehaviour
 
         Vector2 moving = movingAction.ReadValue<Vector2>();
 
-        float forwardInput = moving.y;
-        float horizontalInput = moving.x;
+        //float forwardInput = moving.y;
+        //float horizontalInput = moving.x;
 
-        animator.SetBool("Run", horizontalInput != 0f || forwardInput != 0f);
+        //animator.SetBool("Run", horizontalInput != 0f || forwardInput != 0f);
 
-        transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput);
-        transform.Translate(Vector3.right * Time.deltaTime * speed * horizontalInput);
-        //bool groundedPlayer;
+        //transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput);
+        //transform.Translate(Vector3.right * Time.deltaTime * speed * horizontalInput);
+        bool groundedPlayer;
 
-        //groundedPlayer = controller.isGrounded;
-        //if (groundedPlayer && playerVelocity.y < 0)
-        //{
-        //    playerVelocity.y = 0f;
-        //}
+        groundedPlayer = controller.isGrounded;
+        if (groundedPlayer && playerVelocity.y < 0)
+        {
+            playerVelocity.y = 0f;
+        }
 
-        //Vector3 move = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        //move = Vector3.ClampMagnitude(move, 1f);
+        Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+        Vector3 move = Camera.main.transform.TransformDirection(input);
 
-        //if (move != Vector3.zero)
-        //{
-        //    transform.forward = move;
-        //}
+        input = Vector3.ClampMagnitude(input, 1f);
 
-        //playerVelocity.y += -9.81f * Time.deltaTime;
+        
+        move.y = 0f;
+        move.Normalize();
+  
+        animator.SetBool("Run", move != Vector3.zero);
+        
+        
 
-        //Vector3 finalMove = (move * speed) + (playerVelocity.y * Vector3.up);
-        //controller.Move(finalMove * Time.deltaTime);
+        if (move != Vector3.zero)
+        {
+            //transform.forward = move;
+            Quaternion toRotation = Quaternion.LookRotation(move, Vector3.up);
+            transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, Time.deltaTime * 10f);
+        }
+
+        playerVelocity.y += -9.81f * Time.deltaTime;
+
+        Vector3 finalMove = (move * speed) + (playerVelocity.y * Vector3.up);
+        controller.Move(finalMove * Time.deltaTime);
 
         if (Input.GetKeyDown(KeyCode.E))
         {

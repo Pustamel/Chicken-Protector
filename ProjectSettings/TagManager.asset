@@ -9,6 +9,8 @@ TagManager:
   - PlayerBase
   - Chicken
   - HealingPlace
+  - GameManager
+  - SpawnManager
   layers:
   - Default
   - TransparentFX
