@@ -11,13 +11,16 @@ public class Chicken : MonoBehaviour
     private NavMeshAgent navMesh;
     private AudioSource audioSource;
     private Animator animator;
+  
+    private ChickenState state;
+    public bool isDead = false;
+    public int num = 0;
+    public EnemyController thief = null;
     public enum ChickenState
     {
         OnGround,
         BeingStolen
     }
-    private ChickenState state;
-    private int offsetY = 2;
     void Start()
     {
         animator = GetComponent<Animator>();
@@ -33,24 +36,23 @@ public class Chicken : MonoBehaviour
             transform.LookAt(-house.transform.position);
 
             float distance = Vector3.Distance(transform.position, house.transform.position);
-            //Debug.Log($"DISTANCE {distance}");
 
             if (distance > 3)
             {
                 navMesh.SetDestination(house.transform.position);
-                animator.Play("walking");
+                animator.SetBool("walking", true);
                 animator.speed = 3f;
             }
             else
             {
                 navMesh.ResetPath();
-                animator.Play("Idle");
+                animator.SetBool("walking", false);
                 animator.speed = 1f;
             }
         }
         else
         {
-            animator.Play("Idle");
+            animator.SetBool("walking", false);
             animator.speed = 1f;
         }
     }
@@ -60,27 +62,27 @@ public class Chicken : MonoBehaviour
         transform.position = new Vector3(position.x, position.y + 5, position.z);
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-      
-    }
-
     public void Dead()
     {
+        if(!isDead)
+        {
+        isDead = true;
         audioSource.PlayOneShot(deadSound, 0.2f);
         gameManager.Stolen();
         Destroy(gameObject, 0.5f);
+        }
     }
 
-    public void Take()
+    public void Take(EnemyController enemy)
     {
         state = ChickenState.BeingStolen;
         navMesh.enabled = false;
+        thief = enemy;
     }
 
     public bool isCaptured ()
     {
-        return state == ChickenState.BeingStolen;
+        return state == ChickenState.BeingStolen || isDead;
     }
 
 
@@ -88,5 +90,6 @@ public class Chicken : MonoBehaviour
     {
         state = ChickenState.OnGround;
         navMesh.enabled = true;
+        thief = null;
     }
 }

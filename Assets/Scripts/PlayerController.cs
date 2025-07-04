@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     private CharacterController controller;
     private Vector3 playerVelocity;
     private Animator animator;
+    private float timeReloadAttack = 1.5f;
 
     void Start()
     {
@@ -96,7 +97,7 @@ public class PlayerController : MonoBehaviour
     {
             animator.SetTrigger("Attack");
             AudioSource.PlayOneShot(attackSound, 0.3f);
-            lastTimeAttack = 3.0f;
+            lastTimeAttack = timeReloadAttack;
             Instantiate(attackEffect, new Vector3(transform.position.x, transform.position.y, transform.position.z), transform.rotation);
             DeteckAndDamageEnemies();
     }

@@ -5,13 +5,9 @@ using UnityEngine.UI;
 
 public class EnemyController : MonoBehaviour
 {
-    //[SerializeField] private GameManager gameManager;
-    //[SerializeField] private GameObject house;
-    //[SerializeField] private GameObject enemyBase;
     [SerializeField] private Image healthFilling;
     [SerializeField] private ParticleSystem attackEffect;
     [SerializeField] private AudioClip soundAttack;
-    //[SerializeField] private SpawnManager spawnManager;
 
     private bool carriesChicken;
     private NavMeshAgent navMesh;
@@ -26,6 +22,7 @@ public class EnemyController : MonoBehaviour
     private SpawnManager spawnManager;
     private GameObject house;
     private GameObject enemyBase;
+    private Animator animator;
     void Start()
     {
         navMesh = GetComponent<NavMeshAgent>();
@@ -41,6 +38,9 @@ public class EnemyController : MonoBehaviour
         spawnManager = GameObject.FindWithTag("SpawnManager").GetComponent<SpawnManager>();
         house = GameObject.FindWithTag("PlayerBase");
         enemyBase = GameObject.FindWithTag("EnemyBase");
+        animator = GetComponent<Animator>();
+
+        gameObject.name = $"Enemy_{Random.Range(1000, 9999)}";
     }
 
     void Update()
@@ -49,21 +49,28 @@ public class EnemyController : MonoBehaviour
         {
             lastTimeAttack -= (Time.deltaTime);
         }
-
-        if (carriesChicken)
+    
+        if (carriesChicken && chicken)
         {
             transform.LookAt(enemyBase.transform.position);
             GoToEnemyBase();
         }
         else if (playerTarget != null)
         {
-            transform.LookAt(new Vector3(0, playerTarget.position.y, 0));
+            Vector3 targetPos = playerTarget.position;
+            targetPos.y = transform.position.y;
+            transform.LookAt(targetPos);
             GoToPlayer();
         }
         else
         {
-            transform.LookAt(house.transform.position);
-            navMesh.SetDestination(house.transform.position);
+            float distance = Vector3.Distance(transform.position, house.transform.position);
+
+            if(distance > 3)
+            {
+                transform.LookAt(house.transform.position);
+                navMesh.SetDestination(house.transform.position);
+            }
         }
     }
 
@@ -76,12 +83,14 @@ public class EnemyController : MonoBehaviour
         if (other.CompareTag("EnemyBase"))
         {
             float distance = Vector3.Distance(transform.position, other.transform.position);
+            bool sameEnemy = chicken?.thief == this;
 
-            if (chicken && distance < 3)
+            if (chicken && distance < 3 && !chicken.isDead && sameEnemy)
             {
-                chicken.Dead();
                 carriesChicken = false;
+                chicken.Dead();
                 chicken = null;
+                
             }
         }
 
@@ -98,8 +107,9 @@ public class EnemyController : MonoBehaviour
 
     private void ThrowChicken()
     {
-        if(chicken != null & carriesChicken)
+        if(chicken != null && carriesChicken)
         {
+            chicken.transform.SetParent(null, false);
             carriesChicken = false;
             chicken.Drop();
         }
@@ -117,12 +127,18 @@ public class EnemyController : MonoBehaviour
 
         if(distance < 1.5 && (lastTimeAttack == 0 || lastTimeAttack < 0))
         {
-            lastTimeAttack = 3.0f;
-            audioSource.PlayOneShot(soundAttack, 0.1f);
-            ParticleSystem effect = Instantiate(attackEffect, new Vector3(transform.position.x, transform.position.y, transform.position.z), transform.rotation);
-            Destroy(effect.gameObject, 2f);
-            player.GetComponent<PlayerController>().Damage(15.0f);
+            Attack();
         }
+    }
+
+    private void Attack()
+    {
+        animator.SetTrigger("Attack");
+        lastTimeAttack = 3.0f;
+        audioSource.PlayOneShot(soundAttack, 0.1f);
+        ParticleSystem effect = Instantiate(attackEffect, new Vector3(transform.position.x, transform.position.y, transform.position.z), transform.rotation);
+        Destroy(effect.gameObject, 2f);
+        player.GetComponent<PlayerController>().Damage(15.0f);
     }
 
     private void GoToEnemyBase()
@@ -138,7 +154,7 @@ public class EnemyController : MonoBehaviour
         if (chicken != null && distance < 3 && !chicken.isCaptured())
         {
             carriesChicken = true;
-            chicken.Take();
+            chicken.Take(this);
             chicken.transform.SetParent(transform, false);
             chicken.transform.localPosition = new Vector3(0, 2, 0);
         }

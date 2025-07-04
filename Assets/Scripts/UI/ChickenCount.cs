@@ -6,6 +6,7 @@ public class ChickenCount : MonoBehaviour
 {
     [SerializeField] private GameObject imagePrefab;
     [SerializeField] private Transform panel;
+
     private List<GameObject> chickens = new List<GameObject>();
     void Start()
     {
@@ -17,7 +18,6 @@ public class ChickenCount : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
         

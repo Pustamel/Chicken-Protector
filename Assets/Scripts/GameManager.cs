@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject menu;
     [SerializeField] private GameObject menuPaused;
     [SerializeField] private GameObject menuGameOver;
+    [SerializeField] private GameObject menuWin;
     [SerializeField] private ParticleSystem winEffect;
 
     static private readonly float totalTimeGame = 60.0f;
@@ -31,7 +32,7 @@ public class GameManager : MonoBehaviour
         chickenCount = GetComponent<ChickenCount>();
     }
 
-    private void Awake()
+    void Awake()
     {
         Time.timeScale = 0;
     }
@@ -42,6 +43,78 @@ public class GameManager : MonoBehaviour
         {
             Gaming();
         }
+    }
+
+
+
+    public void StartGame()
+    {
+        menu.SetActive(false);
+        welcomeMessage.enabled = true;
+        Time.timeScale = 1;
+        isGaming = true;
+    }
+
+
+
+    public void GameOver()
+    {
+        gameOver = true;
+        TimeEnded();
+        menuGameOver.SetActive(true);
+    }
+
+    public void PouseGame()
+    {
+        if (isGaming == false)
+        {
+            Time.timeScale = 1;
+            isGaming = true;
+            menuPaused.SetActive(false);
+        } else
+        {
+            Time.timeScale = 0;
+            isGaming = false;
+            menuPaused.SetActive(true);
+        }
+
+    }
+
+    public void Stolen()
+    {
+        if(!gameOver)
+        {
+            chickenCount.RemoveChicken();
+            gameOver = chickenCount.AllChickensDead();
+
+            if(gameOver == true)
+            {
+                GameOver();
+            }
+        }
+    }
+
+
+
+    private void Win()
+    {
+        if (!gameOver)
+        {
+            ParticleSystem effect = Instantiate(winEffect, Vector3.zero, Quaternion.identity);
+            Destroy(effect, 2f);
+            Invoke("OpenWinMenu", 2f);
+        }
+    }
+
+    private void OpenWinMenu()
+    {
+        TimeEnded();
+        menuWin.SetActive(true);
+    }
+    private void TimeEnded()
+    {
+        isGaming = false;
+        Time.timeScale = 0;
     }
 
     private void NightToMorning()
@@ -60,15 +133,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void StartGame()
-    {
-        menu.SetActive(false);
-        welcomeMessage.enabled = true;
-        Time.timeScale = 1;
-        isGaming = true;
-    }
-
-    void Gaming()
+    private void Gaming()
     {
         if (timeGame < (totalTimeGame - 2f))
         {
@@ -93,53 +158,5 @@ public class GameManager : MonoBehaviour
         }
 
         NightToMorning();
-    }
-
-    void TimeEnded()
-    {
-        isGaming = false;
-        Time.timeScale = 0;
-    }
-
-    private void Win()
-    {
-        if(!gameOver)
-        {
-            ParticleSystem effect = Instantiate(winEffect, Vector3.zero, Quaternion.identity);
-            Destroy(effect, 2f);
-        }
-    }
-
-    public void GameOver()
-    {
-        gameOver = true;
-        TimeEnded();
-        menuGameOver.SetActive(true);
-    }
-
-    public void PouseGame()
-    {
-        if (isGaming == false)
-        {
-            Time.timeScale = 1;
-            isGaming = true;
-            menuPaused.SetActive(false);
-        } else
-        {
-            Time.timeScale = 0;
-            isGaming = false;
-            menuPaused.SetActive(true);
-        }
-        
-    }
-
-    public void Stolen()
-    {
-        if(!gameOver)
-        {
-            chickenCount.RemoveChicken();
-            gameOver = chickenCount.AllChickensDead();
-
-        }
     }
 }
