@@ -7,10 +7,6 @@ public class SpawnManager : MonoBehaviour
     private int spawnCount = 0;
     private Vector3 positionEnemySpawn = new Vector3(18f, 0.5f, 17.8f);
     private int MAX_SPAWN_COUNT = 4;
-    void Start()
-    {
-        
-    }
 
     void Update()
     {

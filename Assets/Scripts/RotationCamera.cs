@@ -8,13 +8,10 @@ public class RotationCamera : MonoBehaviour
 
     private float yaw = 0f;
 
-    void Start()
-    {}
-
-    // Update is called once per frame
     void LateUpdate()
     {
         float mouseX = Input.GetAxis("Mouse X");
+
         yaw += mouseX * sensitivity * Time.deltaTime;
         transform.rotation = Quaternion.Euler(32f, yaw, 0f);
         player.transform.rotation = Quaternion.Euler(transform.rotation.x, yaw, 0f);

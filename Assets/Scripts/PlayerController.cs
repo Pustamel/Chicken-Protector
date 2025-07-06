@@ -9,8 +9,8 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private ParticleSystem attackEffect;
     [SerializeField] private LayerMask enemyLayer;
-    [SerializeField] AudioClip attackSound;
-    [SerializeField] float speed = 12f;
+    [SerializeField] private AudioClip attackSound;
+    [SerializeField] private float speed = 12f;
     [SerializeField] private Image healthFilling;
     [SerializeField] private GameManager gameManager;
 
@@ -19,7 +19,6 @@ public class PlayerController : MonoBehaviour
     private float lastTimeAttack = 0f;
     private float simpleDamage = 25.0f;
     private AudioSource AudioSource;
-    private Rigidbody rb;
     private CharacterController controller;
     private Vector3 playerVelocity;
     private Animator animator;
@@ -29,12 +28,10 @@ public class PlayerController : MonoBehaviour
     {
         movingAction = InputSystem.actions.FindAction("Move");
         AudioSource = GetComponent<AudioSource>();
-        rb = GetComponent<Rigidbody>();
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
     }
 
-   
     void Update()
     {
         if(lastTimeAttack > 0 && lastTimeAttack != 0)
@@ -42,15 +39,30 @@ public class PlayerController : MonoBehaviour
             lastTimeAttack -= (Time.deltaTime);
         }
 
+        MovePlayer();
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if(lastTimeAttack == 0 || lastTimeAttack < 0)
+            {
+                Attack();
+            }
+        }
+    }
+    public void Damage(float damage)
+    {
+        health -= damage;
+        healthFilling.fillAmount = (health / 100);
+
+        if (health <= 0)
+        {
+            Dead();
+        }
+    }
+
+    private void MovePlayer()
+    {
         Vector2 moving = movingAction.ReadValue<Vector2>();
-
-        //float forwardInput = moving.y;
-        //float horizontalInput = moving.x;
-
-        //animator.SetBool("Run", horizontalInput != 0f || forwardInput != 0f);
-
-        //transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput);
-        //transform.Translate(Vector3.right * Time.deltaTime * speed * horizontalInput);
         bool groundedPlayer;
 
         groundedPlayer = controller.isGrounded;
@@ -64,17 +76,13 @@ public class PlayerController : MonoBehaviour
 
         input = Vector3.ClampMagnitude(input, 1f);
 
-        
         move.y = 0f;
         move.Normalize();
-  
+
         animator.SetBool("Run", move != Vector3.zero);
-        
-        
 
         if (move != Vector3.zero)
         {
-            //transform.forward = move;
             Quaternion toRotation = Quaternion.LookRotation(move, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, Time.deltaTime * 10f);
         }
@@ -83,23 +91,15 @@ public class PlayerController : MonoBehaviour
 
         Vector3 finalMove = (move * speed) + (playerVelocity.y * Vector3.up);
         controller.Move(finalMove * Time.deltaTime);
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            if(lastTimeAttack == 0 || lastTimeAttack < 0)
-            {
-                Attack();
-            }
-        }
     }
 
-    void Attack()
+    private void Attack()
     {
-            animator.SetTrigger("Attack");
-            AudioSource.PlayOneShot(attackSound, 0.3f);
-            lastTimeAttack = timeReloadAttack;
-            Instantiate(attackEffect, new Vector3(transform.position.x, transform.position.y, transform.position.z), transform.rotation);
-            DeteckAndDamageEnemies();
+        animator.SetTrigger("Attack");
+        AudioSource.PlayOneShot(attackSound, 0.3f);
+        lastTimeAttack = timeReloadAttack;
+        Instantiate(attackEffect, new Vector3(transform.position.x, transform.position.y, transform.position.z), transform.rotation);
+        DeteckAndDamageEnemies();
     }
 
     private void Dead()
@@ -107,23 +107,12 @@ public class PlayerController : MonoBehaviour
         gameManager.GameOver(); 
     }
 
-    public void Damage(float damage)
-    {
-        health -= damage;
-        healthFilling.fillAmount = (health / 100);
-
-        if (health <= 0)
-        {
-            Dead();
-        }
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if(other.CompareTag("HealingPlace"))
         {
             health = 100;
-            healthFilling.fillAmount = 1;
+            healthFilling.fillAmount = 1; //update ui
         }
     }
 

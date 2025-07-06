@@ -74,24 +74,24 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void Damage(float damage)
     {
+
+        health -= damage;
+        healthFilling.fillAmount = (health / 100);
+        ThrowChicken();
+
+        if (health <= 0)
+        {
+            Dead();
+        }
     }
 
     private void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("EnemyBase"))
         {
-            float distance = Vector3.Distance(transform.position, other.transform.position);
-            bool sameEnemy = chicken?.thief == this;
-
-            if (chicken && distance < 3 && !chicken.isDead && sameEnemy)
-            {
-                carriesChicken = false;
-                chicken.Dead();
-                chicken = null;
-                
-            }
+            KillChicken(other);
         }
 
         if (other.CompareTag("Player") && !carriesChicken)
@@ -102,6 +102,20 @@ public class EnemyController : MonoBehaviour
         else if (other.CompareTag("Chicken") && !carriesChicken)
         {
             StealChicken(other);
+        }
+    }
+
+    private void KillChicken(Collider other)
+    {
+        float distanceToEnemyBase = Vector3.Distance(transform.position, other.transform.position);
+        bool sameEnemy = chicken?.thief == this;
+
+        if (chicken && distanceToEnemyBase < 3 && !chicken.isDead && sameEnemy)
+        {
+            carriesChicken = false;
+            chicken.Dead();
+            chicken = null;
+
         }
     }
 
@@ -172,18 +186,5 @@ public class EnemyController : MonoBehaviour
     {
         spawnManager.DeleteSpawnedEnemy();
         Destroy(gameObject);
-    }
-
-    public void Damage(float damage)
-    {
-        
-        health -= damage;
-        healthFilling.fillAmount = (health / 100);
-        ThrowChicken();
-
-        if (health <= 0)
-        {
-            Dead();
-        }
     }
 }

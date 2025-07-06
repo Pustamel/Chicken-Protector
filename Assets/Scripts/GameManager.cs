@@ -20,11 +20,11 @@ public class GameManager : MonoBehaviour
 
     static private readonly float totalTimeGame = 60.0f;
 
-    private float timeGame = totalTimeGame;
-    private ChickenCount chickenCount;
     public bool isGaming = false;
     public bool gameOver = false;
     public bool paused = false;
+    private float timeGame = totalTimeGame;
+    private ChickenCount chickenCount;
     private float elapsedTime = 0f;
 
     void Start()
@@ -44,8 +44,6 @@ public class GameManager : MonoBehaviour
             Gaming();
         }
     }
-
-
 
     public void StartGame()
     {
@@ -93,8 +91,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-
 
     private void Win()
     {

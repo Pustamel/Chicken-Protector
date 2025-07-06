@@ -11,11 +11,11 @@ public class Chicken : MonoBehaviour
     private NavMeshAgent navMesh;
     private AudioSource audioSource;
     private Animator animator;
-  
     private ChickenState state;
     public bool isDead = false;
     public int num = 0;
     public EnemyController thief = null;
+
     public enum ChickenState
     {
         OnGround,
@@ -84,7 +84,6 @@ public class Chicken : MonoBehaviour
     {
         return state == ChickenState.BeingStolen || isDead;
     }
-
 
     public void Drop()
     {

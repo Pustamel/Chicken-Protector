@@ -18,16 +18,12 @@ public class ChickenCount : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        
-    }
-
     public bool AllChickensDead()
     {
         return chickens.Count == 0;
     }
 
+    // Remove chicken only from UI
     public void RemoveChicken()
     {
         if(chickens.Count > 0)

@@ -4,17 +4,14 @@ using UnityEngine.UI;
 
 public class RestartGame : MonoBehaviour
 {
-    private Button button;
     [SerializeField] private GameManager gameManager;
+
+    private Button button;
+
     void Start()
     {
         button = GetComponent<Button>();
         button.onClick.AddListener(Restart);
-    }
-
-    void Update()
-    {
-        
     }
 
     private void Restart ()
